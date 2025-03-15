@@ -159,8 +159,8 @@ fn kem_encrypt_keys<R: Read + Seek>(
         let mut buf = [0u8; KEM_PUB_KEY_SIZE + KEY_SIZE];
 
         while let Ok(_) = key_reader.reader.read_exact(&mut buf) {
-            let kem_pub_key = buf[0..KEM_PUB_KEY_SIZE].try_into().unwrap();
-            let kem_pub_key = KemPublicKey::from(&kem_pub_key);
+            let mut kem_pub_key = buf[0..KEM_PUB_KEY_SIZE].try_into().unwrap();
+            let kem_pub_key = KemPublicKey::from(&mut kem_pub_key);
 
             let mut kem_shared_secret_buf = [0u8; KEY_SIZE];
             let (kem_ciphertext, kem_shared_secret) =
@@ -195,7 +195,7 @@ fn kem_encrypt_keys<R: Read + Seek>(
         let mut buf = [0u8; KEM_PUB_KEY_SIZE];
 
         while let Ok(_) = key_reader.reader.read_exact(&mut buf) {
-            let kem_pub_key = KemPublicKey::from(&buf);
+            let kem_pub_key = KemPublicKey::from(&mut buf);
 
             let mut kem_shared_secret_buf = [0u8; KEY_SIZE];
             let (kem_ciphertext, kem_shared_secret) =
