@@ -698,12 +698,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "rgp"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de1ec70dd30a64e324400446fa674ee1c2b40d8cf1dfe371cdb7abd65ad7c122"
+dependencies = [
+ "blake2",
+ "chacha20",
+ "chacha20poly1305",
+ "classic-mceliece-rust",
+ "ed25519-dalek",
+ "rand",
+ "rand_core",
+ "x25519-dalek",
+]
+
+[[package]]
 name = "rgp-web"
 version = "0.3.3"
 dependencies = [
  "getrandom",
  "rand",
- "rgp",
+ "rgp 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen",
 ]
 

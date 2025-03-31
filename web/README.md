@@ -5,7 +5,7 @@ WebAssembly bindings for [RGP](https://github.com/ordinarylabs/RGP).
 ## Usage
 
 ```js
-import init, { generate_fingerprint, generate_dh_keys, encrypt_dh, decrypt_dh, } from "https://unpkg.com/rgp-web@0.2.0/rgp_web.js";
+import init, { generate_fingerprint, generate_dh_keys, encrypt_dh, decrypt_dh, } from "https://unpkg.com/rgp-web@0.3.3/rgp_web.js";
 
 
 (async () => {
