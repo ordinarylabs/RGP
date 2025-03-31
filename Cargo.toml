@@ -4,16 +4,16 @@
 # This file may not be copied, modified, or distributed except according to those terms.
 
 [package]
-authors = ["sean watters <sean@watters.io>"]
+authors = ["sean watters <sean@ordinarylabs.io>"]
 description = "Enabling E2EE for a range of applications."
 categories = ["cryptography"]
-edition = "2021"
-homepage = "https://github.com/seanwatters/rgp"
+edition = "2024"
+homepage = "https://github.com/ordinarylabs/rgp"
 keywords = ["e2ee", "encryption", "crypto", "security"]
 license = "MIT"
 name = "rgp"
 readme = "README.md"
-repository = "https://github.com/seanwatters/rgp"
+repository = "https://github.com/ordinarylabs/rgp"
 version = "0.3.3"
 
 [dependencies]
@@ -40,3 +40,6 @@ multi-thread = ["dep:rayon"]
 [[bench]]
 name = "crypto"
 harness = false
+
+[workspace]
+members = ["web"]

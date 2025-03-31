@@ -1,0 +1,21 @@
+[package]
+name = "rgp-web"
+license = "MIT"
+version = "0.2.1"
+description = "WebAssembly bindings for the RGP crate."
+edition = "2024"
+authors = ["sean watters <sean@ordinarylabs.io>"]
+repository = "https://github.com/ordinarylabs/rgp"
+homepage = "https://github.com/ordinarylabs/rgp"
+keywords = ["e2ee", "encryption", "crypto", "security"]
+categories = ["cryptography"]
+readme = "README.md"
+
+[dependencies]
+wasm-bindgen = "0.2.87"
+rgp = { path = "..", default-features = false }
+rand = "0.8.5"
+getrandom = { version = "0.2", features = ["js"] }
+
+[lib]
+crate-type = ["cdylib", "rlib"]
