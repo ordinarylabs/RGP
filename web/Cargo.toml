@@ -1,7 +1,7 @@
 [package]
 name = "rgp-web"
 license = "MIT"
-version = "0.3.3"
+version = "0.3.4"
 description = "WebAssembly bindings for the RGP crate."
 edition = "2024"
 authors = ["sean watters <sean@ordinarylabs.io>"]
@@ -12,10 +12,10 @@ categories = ["cryptography"]
 readme = "README.md"
 
 [dependencies]
-wasm-bindgen = "0.2.87"
-rgp = { version = "0.3.3", default-features = false }
-rand = "0.8.5"
-getrandom = { version = "0.2", features = ["js"] }
+wasm-bindgen = "0.2.100"
+rgp = { version = "0.3.4", default-features = false }
+## lower version is necessary until blake2 (in rgp) upgrades
+getrandom = { version = "0.2", features = ["js"]}
 
 [lib]
 crate-type = ["cdylib", "rlib"]

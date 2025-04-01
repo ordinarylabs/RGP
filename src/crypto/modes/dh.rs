@@ -6,7 +6,7 @@ This file may not be copied, modified, or distributed except according to those 
 */
 
 use super::super::{
-    base_decrypt, base_encrypt, bytes_to_usize, usize_to_bytes, KEY_SIZE, NONCE_SIZE,
+    KEY_SIZE, NONCE_SIZE, base_decrypt, base_encrypt, bytes_to_usize, usize_to_bytes,
 };
 
 #[cfg(feature = "multi-thread")]
@@ -16,10 +16,10 @@ use std::sync::mpsc::channel;
 
 use blake2::digest::{FixedOutput, Mac};
 use chacha20::{
-    cipher::{generic_array::GenericArray, typenum, StreamCipher},
     XChaCha20,
+    cipher::{StreamCipher, generic_array::GenericArray, typenum},
 };
-use chacha20poly1305::{AeadCore, XChaCha20Poly1305};
+use chacha20poly1305::{AeadCore, XChaCha20Poly1305, aead::OsRng};
 use x25519_dalek::StaticSecret;
 
 /// #
@@ -90,7 +90,7 @@ pub const DH_WITH_HMAC_MODE: u8 = 4;
 /// assert_eq!(pub_key.len(), 32);
 /// ```
 pub fn generate_dh_keys() -> ([u8; 32], [u8; 32]) {
-    let priv_key = x25519_dalek::StaticSecret::random_from_rng(rand_core::OsRng);
+    let priv_key = x25519_dalek::StaticSecret::random_from_rng(OsRng);
     let pub_key = x25519_dalek::PublicKey::from(&priv_key);
 
     (*priv_key.as_bytes(), *pub_key.as_bytes())
@@ -148,11 +148,11 @@ pub fn dh_encrypt(
     pub_keys: &Vec<[u8; KEY_SIZE]>,
     hmac_key: Option<[u8; KEY_SIZE]>,
 ) -> Result<(Vec<u8>, [u8; KEY_SIZE]), &'static str> {
-    let nonce = XChaCha20Poly1305::generate_nonce(&mut rand_core::OsRng);
+    let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
     let mut out = nonce.to_vec();
 
     use chacha20poly1305::KeyInit;
-    let key = XChaCha20Poly1305::generate_key(&mut rand_core::OsRng);
+    let key = XChaCha20Poly1305::generate_key(&mut OsRng);
 
     #[cfg(feature = "multi-thread")]
     let (sender, receiver) = channel();

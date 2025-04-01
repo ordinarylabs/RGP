@@ -6,14 +6,14 @@ This file may not be copied, modified, or distributed except according to those 
 */
 
 use super::super::{
-    base_decrypt, base_encrypt, bytes_to_usize, usize_to_bytes, KEY_SIZE, NONCE_SIZE,
+    KEY_SIZE, NONCE_SIZE, base_decrypt, base_encrypt, bytes_to_usize, usize_to_bytes,
 };
 
 use blake2::digest::{
-    generic_array::{typenum, GenericArray},
     FixedOutput, Mac,
+    generic_array::{GenericArray, typenum},
 };
-use chacha20poly1305::{AeadCore, XChaCha20Poly1305};
+use chacha20poly1305::{AeadCore, XChaCha20Poly1305, aead::OsRng};
 
 /// #
 /// **ENCRYPTED FORMAT:**
@@ -47,7 +47,7 @@ pub fn hmac_encrypt(
     hmac_value: [u8; KEY_SIZE],
     iteration: usize,
 ) -> Result<(Vec<u8>, [u8; KEY_SIZE]), &'static str> {
-    let nonce = XChaCha20Poly1305::generate_nonce(&mut rand_core::OsRng);
+    let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
     let mut out = nonce.to_vec();
 
     let key = blake2::Blake2sMac256::new_from_slice(&hmac_key)

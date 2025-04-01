@@ -6,7 +6,7 @@ This file may not be copied, modified, or distributed except according to those 
 */
 
 use super::super::{
-    base_decrypt, base_encrypt, bytes_to_usize, usize_to_bytes, KEY_SIZE, NONCE_SIZE,
+    KEY_SIZE, NONCE_SIZE, base_decrypt, base_encrypt, bytes_to_usize, usize_to_bytes,
 };
 
 use std::io::{BufReader, Read, Seek};
@@ -15,14 +15,14 @@ use std::sync::mpsc::channel;
 
 use blake2::digest::{FixedOutput, Mac};
 use chacha20::{
-    cipher::{generic_array::GenericArray, typenum, StreamCipher},
     XChaCha20,
+    cipher::{StreamCipher, generic_array::GenericArray, typenum},
 };
-use chacha20poly1305::{AeadCore, XChaCha20Poly1305};
+use chacha20poly1305::{AeadCore, XChaCha20Poly1305, aead::OsRng};
 use classic_mceliece_rust::{
-    decapsulate, encapsulate, keypair as kem_keypair, Ciphertext, PublicKey as KemPublicKey,
-    SecretKey as KemSecretKey, CRYPTO_CIPHERTEXTBYTES as KEM_CIPHERTEXT_SIZE,
-    CRYPTO_PUBLICKEYBYTES as KEM_PUB_KEY_SIZE, CRYPTO_SECRETKEYBYTES as KEM_SECRET_KEY_SIZE,
+    CRYPTO_CIPHERTEXTBYTES as KEM_CIPHERTEXT_SIZE, CRYPTO_PUBLICKEYBYTES as KEM_PUB_KEY_SIZE,
+    CRYPTO_SECRETKEYBYTES as KEM_SECRET_KEY_SIZE, Ciphertext, PublicKey as KemPublicKey,
+    SecretKey as KemSecretKey, decapsulate, encapsulate, keypair as kem_keypair,
 };
 use x25519_dalek::StaticSecret;
 
@@ -97,12 +97,10 @@ pub const KEM_WITH_DH_HYBRID_MODE: u8 = 6;
 /// assert_eq!(pub_key.len(), 261120);
 ///```
 pub fn generate_kem_keys() -> ([u8; KEM_SECRET_KEY_SIZE], [u8; KEM_PUB_KEY_SIZE]) {
-    let mut rng = rand::thread_rng();
-
     let mut public_key_buf = [0u8; KEM_PUB_KEY_SIZE];
     let mut secret_key_buf = [0u8; KEM_SECRET_KEY_SIZE];
 
-    let (pub_key, secret_key) = kem_keypair(&mut public_key_buf, &mut secret_key_buf, &mut rng);
+    let (pub_key, secret_key) = kem_keypair(&mut public_key_buf, &mut secret_key_buf, &mut OsRng);
 
     (*secret_key.as_array(), *pub_key.as_array())
 }
@@ -147,8 +145,6 @@ fn kem_encrypt_keys<R: Read + Seek>(
 ) -> ((usize, [u8; 9]), Vec<u8>) {
     use chacha20::cipher::KeyIvInit;
 
-    let mut rng = rand::thread_rng();
-
     let mut key_pos = 0;
     let mut out = vec![];
 
@@ -164,7 +160,7 @@ fn kem_encrypt_keys<R: Read + Seek>(
 
             let mut kem_shared_secret_buf = [0u8; KEY_SIZE];
             let (kem_ciphertext, kem_shared_secret) =
-                encapsulate(&kem_pub_key, &mut kem_shared_secret_buf, &mut rng);
+                encapsulate(&kem_pub_key, &mut kem_shared_secret_buf, &mut OsRng);
 
             let mut key = GenericArray::from(*kem_shared_secret.as_array());
 
@@ -199,7 +195,7 @@ fn kem_encrypt_keys<R: Read + Seek>(
 
             let mut kem_shared_secret_buf = [0u8; KEY_SIZE];
             let (kem_ciphertext, kem_shared_secret) =
-                encapsulate(&kem_pub_key, &mut kem_shared_secret_buf, &mut rng);
+                encapsulate(&kem_pub_key, &mut kem_shared_secret_buf, &mut OsRng);
 
             let key = GenericArray::from(*kem_shared_secret.as_array());
 
@@ -227,11 +223,11 @@ pub fn kem_encrypt<'a, R: Read + Seek>(
     mut content: Vec<u8>,
     key_reader: &mut KemKeyReader<R>,
 ) -> Result<(Vec<u8>, [u8; KEY_SIZE]), &'static str> {
-    let nonce = XChaCha20Poly1305::generate_nonce(&mut rand_core::OsRng);
+    let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
     let mut out = nonce.to_vec();
 
     use chacha20poly1305::KeyInit;
-    let key = XChaCha20Poly1305::generate_key(&mut rand_core::OsRng);
+    let key = XChaCha20Poly1305::generate_key(&mut OsRng);
 
     #[cfg(feature = "multi-thread")]
     let (sender, receiver) = channel();
@@ -342,10 +338,10 @@ pub fn kem_extract(
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{remove_file, File, OpenOptions};
+    use std::fs::{File, OpenOptions, remove_file};
     use std::io::Write;
 
-    use super::{kem_decrypt, kem_encrypt, kem_extract, KemKeyReader};
+    use super::{KemKeyReader, kem_decrypt, kem_encrypt, kem_extract};
 
     #[test]
     fn test_kem() {

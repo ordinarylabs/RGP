@@ -6,7 +6,10 @@ This file may not be copied, modified, or distributed except according to those 
 */
 
 use chacha20::cipher::{generic_array::GenericArray, typenum};
-use chacha20poly1305::{aead::Aead, XChaCha20Poly1305};
+use chacha20poly1305::{
+    XChaCha20Poly1305,
+    aead::{Aead, OsRng},
+};
 use ed25519_dalek::{Signer, Verifier};
 
 use classic_mceliece_rust::{
@@ -16,8 +19,8 @@ use classic_mceliece_rust::{
 mod modes;
 use modes::*;
 pub use modes::{
-    generate_dh_keys, generate_kem_keys, KemKeyReader, DH_MODE, DH_WITH_HMAC_MODE, HMAC_MODE,
-    KEM_MODE, KEM_WITH_DH_HYBRID_MODE, SESSION_MODE, SESSION_WITH_KEYGEN_MODE,
+    DH_MODE, DH_WITH_HMAC_MODE, HMAC_MODE, KEM_MODE, KEM_WITH_DH_HYBRID_MODE, KemKeyReader,
+    SESSION_MODE, SESSION_WITH_KEYGEN_MODE, generate_dh_keys, generate_kem_keys,
 };
 
 mod decrypt;
@@ -44,7 +47,7 @@ const SIGNATURE_SIZE: usize = 64;
 /// assert_eq!(verifier.len(), 32);
 /// ```
 pub fn generate_fingerprint() -> ([u8; 32], [u8; 32]) {
-    let fingerprint = ed25519_dalek::SigningKey::generate(&mut rand_core::OsRng);
+    let fingerprint = ed25519_dalek::SigningKey::generate(&mut OsRng);
 
     (
         fingerprint.to_bytes(),

@@ -5,13 +5,13 @@ Licensed under the MIT license <LICENSE or https://opensource.org/licenses/MIT>.
 This file may not be copied, modified, or distributed except according to those terms.
 */
 
-use super::super::{base_decrypt, base_encrypt, KEY_SIZE, NONCE_SIZE};
+use super::super::{KEY_SIZE, NONCE_SIZE, base_decrypt, base_encrypt};
 
 use chacha20::{
-    cipher::{generic_array::GenericArray, typenum, StreamCipher},
     XChaCha20,
+    cipher::{StreamCipher, generic_array::GenericArray, typenum},
 };
-use chacha20poly1305::{AeadCore, XChaCha20Poly1305};
+use chacha20poly1305::{AeadCore, XChaCha20Poly1305, aead::OsRng};
 
 /// #
 /// **ENCRYPTED FORMAT:**
@@ -54,13 +54,13 @@ pub fn session_encrypt(
     session_key: [u8; KEY_SIZE],
     with_keygen: bool,
 ) -> Result<(Vec<u8>, [u8; KEY_SIZE]), &'static str> {
-    let nonce = XChaCha20Poly1305::generate_nonce(&mut rand_core::OsRng);
+    let nonce = XChaCha20Poly1305::generate_nonce(&mut OsRng);
     let mut out = nonce.to_vec();
 
     if with_keygen {
         let content_key = {
             use chacha20poly1305::KeyInit;
-            XChaCha20Poly1305::generate_key(&mut rand_core::OsRng)
+            XChaCha20Poly1305::generate_key(&mut OsRng)
         };
 
         let mut key_cipher = {
