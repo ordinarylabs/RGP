@@ -1,5 +1,7 @@
 # RGP
 
+**MOVED TO https://codeberg.org/ordinarylabs/RGP**
+
 [![ci](https://github.com//ordinarylabs/rgp/actions/workflows/ci.yml/badge.svg)](https://github.com//ordinarylabs/rgp/actions/workflows/ci.yml)
 [![license](https://img.shields.io/github/license/ordinarylabs/rgp.svg)](https://github.com/ordinarylabs/rgp/blob/main/LICENSE)
 [![crates.io](https://img.shields.io/crates/v/rgp.svg)](https://crates.io/crates/rgp)
